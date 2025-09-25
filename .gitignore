@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Local data / artifacts
+hrv_lab.sqlite3
+data/
+# keep the folder structure but not files (optional):
+# !data/.keep
+
+# OS/editor
+.DS_Store
+*.log
+.vscode/
+.idea/
+EOF
