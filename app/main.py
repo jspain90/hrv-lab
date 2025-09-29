@@ -13,7 +13,7 @@ from .routers import interventions, compliance, metrics, dashboard, dev
 def create_app() -> FastAPI:
     app = FastAPI(title="HRV-Lab LAN API", version="0.2.0")
 
-    # file upload endpoint (kept here as a top-level utility)
+    # file upload endpoint
     @app.post("/ingest/file")
     def ingest_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
         content = file.file.read()

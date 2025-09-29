@@ -90,3 +90,42 @@ loadSeries();
 </html>""")
 
     return HTMLResponse(tpl.substitute(base=base, buttons=html_buttons))
+
+"""
+Button for wiring up the data refresh api: 
+
+<button id="refreshBtn">Refresh data</button>
+<pre id="refreshOut" style="white-space:pre-wrap"></pre>
+
+<script>
+const btn = document.getElementById('refreshBtn');
+const out = document.getElementById('refreshOut');
+
+async function refreshData() {
+  btn.disabled = true;
+  out.textContent = "Refreshing…";
+  try {
+    // optional: ping status first
+    const res = await fetch('/refresh', { method: 'POST' });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err || res.statusText);
+    }
+    const json = await res.json();
+    out.textContent =
+      `Done.\n` +
+      `Fetched zips: ${json.fetched_zips}\n` +
+      `Processed files: ${json.processed_files}\n` +
+      `Quarantined: ${json.quarantined}\n` +
+      `Archive deletions: ${json.archived_deleted}`;
+  } catch (e) {
+    out.textContent = "Error: " + (e.message || e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+btn.addEventListener('click', refreshData);
+</script>
+
+"""

@@ -6,8 +6,12 @@ __pycache__/
 # Local data / artifacts
 hrv_lab.sqlite3
 data/
-# keep the folder structure but not files (optional):
-# !data/.keep
+data_pipeline/io/*
+token.json
+*.zip
+*.txt
+secrets/*
+state/*
 
 # OS/editor
 .DS_Store
