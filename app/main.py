@@ -4,21 +4,20 @@ from fastapi import FastAPI, UploadFile, File, Depends
 from .core.db import get_db
 from .core.settings import settings
 from .core import models  # ensures tables are created
-from .services.ingest import ingest_content
 from sqlalchemy.orm import Session
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 # Routers
-from .routers import interventions, compliance, metrics, dashboard, dev
+from .routers import interventions, compliance, metrics, dashboard, dev, refresh
 
 def create_app() -> FastAPI:
     app = FastAPI(title="HRV-Lab LAN API", version="0.2.0")
 
-    # file upload endpoint
-    @app.post("/ingest/file")
-    def ingest_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
-        content = file.file.read()
-        inserted = ingest_content(content, file.filename, db)
-        return {"ok": True, "readings": inserted}
+    # templates + static
+    templates = Jinja2Templates(directory="templates")
+    app.state.templates = templates                      # make accessible to routers
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
     # include routers
     app.include_router(interventions.router)
@@ -26,12 +25,7 @@ def create_app() -> FastAPI:
     app.include_router(metrics.router)
     app.include_router(dashboard.router)
     app.include_router(dev.router)
-
-    # startup: create required dirs
-    @app.on_event("startup")
-    def _startup_dirs():
-        os.makedirs(settings.inbox_dir, exist_ok=True)
-        os.makedirs(settings.archive_dir, exist_ok=True)
+    app.include_router(refresh.router)
 
     return app
 

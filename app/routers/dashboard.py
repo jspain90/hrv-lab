@@ -16,116 +16,17 @@ def now_page(request: Request, db: Session = Depends(get_db)):
     buttons = []
     for i in interventions:
         tok = db.query(QuickToken).filter_by(intervention_id=i.id, purpose="compliance_quick").first()
-        if tok:
-            buttons.append(
-                f"<a href='{base}/c/{tok.token}' "
-                "style='display:inline-block;padding:12px 18px;margin:8px;font-size:16px;"
-                "border:1px solid #ddd;border-radius:10px;text-decoration:none;'>"
-                f"✓ {i.name}</a>"
-            )
-        else:
-            buttons.append(f"<a href='{base}/interventions/{i.id}/qr'>Make QR for {i.name}</a>")
-    html_buttons = "".join(buttons) or "<em>No interventions yet.</em>"
+        href = f"/c/{tok.token}" if tok else f"/interventions/{i.id}/qr"
+        label = f"✓ {i.name}" if tok else f"Make QR for {i.name}"
+        buttons.append({"label": label, "href": href})
 
-    tpl = Template(r"""<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>HRV-Lab — Now</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px}
-    .wrap{max-width:960px;margin:auto}
-    .card{padding:16px;border:1px solid #ddd;border-radius:12px;margin:12px 0}
-    #chart{max-width:100%;border:1px solid #eee;border-radius:8px;margin-top:12px}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <h1>HRV-Lab — Now</h1>
-    <div class="card"><h3>Quick compliance</h3><div>$buttons</div></div>
-    <div class="card">
-      <h3>Metric</h3>
-      <select id="metric">
-        <option value="total_power_ln" selected>Total Power (ln)</option>
-        <option value="lf">LF</option>
-        <option value="hf">HF</option>
-        <option value="rmssd">RMSSD</option>
-      </select>
-      <button id="load">Load</button>
-      <canvas id="chart" width="900" height="300"></canvas>
-    </div>
-  </div>
-<script>
-async function loadSeries(){
-  const metric = document.getElementById('metric').value;
-  const res = await fetch('$base/metrics/series?metric=' + encodeURIComponent(metric));
-  const data = await res.json();
-  draw(data.t, data.v, metric);
-}
-function draw(ts, vals, label){
-  const c = document.getElementById('chart');
-  const ctx = c.getContext('2d');
-  ctx.clearRect(0,0,c.width,c.height);
-  if(!ts.length){ ctx.fillText('No data for ' + label, 20, 20); return; }
-  const W=c.width, H=c.height, pad=40;
-  const nums = vals.filter(v=>Number.isFinite(v));
-  const vmin = Math.min.apply(null, nums), vmax = Math.max.apply(null, nums);
-  const xscale = (i)=> pad + (W-2*pad)*(i/((ts.length-1)||1));
-  const yscale = (v)=> H-pad - (H-2*pad)*((v - vmin)/((vmax - vmin)||1));
-  // axes
-  ctx.strokeStyle='#999'; ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke();
-  // line
-  ctx.strokeStyle='#000'; ctx.beginPath(); let started=false;
-  for(let i=0;i<vals.length;i++){
-    const v=vals[i]; if(!Number.isFinite(v)) continue;
-    const x=xscale(i), y=yscale(v);
-    if(!started){ ctx.moveTo(x,y); started=true; } else { ctx.lineTo(x,y); }
-  }
-  ctx.stroke();
-}
-document.getElementById('load').addEventListener('click', loadSeries);
-loadSeries();
-</script>
-</body>
-</html>""")
+    return request.app.state.templates.TemplateResponse(
+        "now.html",
+        {"request": request, "buttons": buttons, "default_metric": "total_power_ln"},
+    )
 
-    return HTMLResponse(tpl.substitute(base=base, buttons=html_buttons))
-
-"""
-Button for wiring up the data refresh api: 
-
-<button id="refreshBtn">Refresh data</button>
-<pre id="refreshOut" style="white-space:pre-wrap"></pre>
-
-<script>
-const btn = document.getElementById('refreshBtn');
-const out = document.getElementById('refreshOut');
-
-async function refreshData() {
-  btn.disabled = true;
-  out.textContent = "Refreshing…";
-  try {
-    // optional: ping status first
-    const res = await fetch('/refresh', { method: 'POST' });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err || res.statusText);
-    }
-    const json = await res.json();
-    out.textContent =
-      `Done.\n` +
-      `Fetched zips: ${json.fetched_zips}\n` +
-      `Processed files: ${json.processed_files}\n` +
-      `Quarantined: ${json.quarantined}\n` +
-      `Archive deletions: ${json.archived_deleted}`;
-  } catch (e) {
-    out.textContent = "Error: " + (e.message || e);
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-btn.addEventListener('click', refreshData);
-</script>
-
-"""
+    templates = request.app.state.templates
+    return templates.TemplateResponse(
+        "now.html",
+        {"request": request, "buttons": items, "default_metric": "total_power_ln"},
+    )

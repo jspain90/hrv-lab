@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>HRV-Lab — Now</title>
+  <link rel="stylesheet" href="/static/now.css">
+</head>
+<body>
+  <div class="wrap">
+    <h1>HRV-Lab — Now</h1>
+
+    <div class="card">
+    <h3>Maintenance</h3>
+    <button id="refreshBtn">Refresh data</button>
+    <pre id="refreshOut" style="white-space:pre-wrap"></pre>
+    </div>
+
+    <div class="card">
+      <h3>Quick compliance</h3>
+      <div class="row">
+        {% if buttons %}
+          {% for b in buttons %}
+            <a href="{{ b.href }}" class="btn">{{ b.label }}</a>
+          {% endfor %}
+        {% else %}
+          <em>No interventions yet.</em>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Metric</h3>
+      <select id="metric">
+        <option value="total_power_ln" {% if default_metric=='total_power_ln' %}selected{% endif %}>Total Power (ln)</option>
+        <option value="lf">LF</option>
+        <option value="hf">HF</option>
+        <option value="rmssd">RMSSD</option>
+      </select>
+      <button id="load">Load</button>
+      <canvas id="chart" width="900" height="300"></canvas>
+    </div>
+  </div>
+
+  <script src="/static/now.js"></script>
+</body>
+</html>
