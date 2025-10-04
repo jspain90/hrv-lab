@@ -11,7 +11,8 @@ router = APIRouter(tags=["dashboard"])
 @router.get("/now", response_class=HTMLResponse)
 def now_page(request: Request, db: Session = Depends(get_db)):
     base = str(request.base_url).rstrip('/')
-    interventions = db.query(Intervention).order_by(Intervention.start_date.desc()).all()
+    # Only show active interventions on Compliance tab
+    interventions = db.query(Intervention).filter_by(active=True).order_by(Intervention.start_date.desc()).all()
 
     buttons = []
     for i in interventions:
@@ -22,11 +23,5 @@ def now_page(request: Request, db: Session = Depends(get_db)):
 
     return request.app.state.templates.TemplateResponse(
         "now.html",
-        {"request": request, "buttons": buttons, "default_metric": "total_power_ln"},
-    )
-
-    templates = request.app.state.templates
-    return templates.TemplateResponse(
-        "now.html",
-        {"request": request, "buttons": items, "default_metric": "total_power_ln"},
+        {"request": request, "buttons": buttons, "default_metric": "total_power_ms2_ln"},
     )

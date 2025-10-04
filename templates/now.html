@@ -4,41 +4,156 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>HRV-Lab — Now</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="stylesheet" href="/static/now.css">
 </head>
 <body>
   <div class="wrap">
-    <h1>HRV-Lab — Now</h1>
+    <h1>POTS Laboratory</h1>
 
-    <div class="card">
-    <h3>Maintenance</h3>
-    <button id="refreshBtn">Refresh data</button>
-    <pre id="refreshOut" style="white-space:pre-wrap"></pre>
+    <!-- Tab navigation -->
+    <div class="tab-nav">
+      <button class="tab-button active" data-tab="compliance">Compliance</button>
+      <button class="tab-button" data-tab="metrics">Analysis</button>
+      <button class="tab-button" data-tab="new-intervention">Interventions</button>
+      <button class="tab-button" data-tab="maintenance">Maintenance</button>
     </div>
 
-    <div class="card">
-      <h3>Quick compliance</h3>
-      <div class="row">
-        {% if buttons %}
-          {% for b in buttons %}
-            <a href="{{ b.href }}" class="btn">{{ b.label }}</a>
-          {% endfor %}
-        {% else %}
-          <em>No interventions yet.</em>
-        {% endif %}
+    <!-- Compliance tab -->
+    <div class="tab-content active" id="tab-compliance">
+      <div class="card">
+        <h3>Quick compliance</h3>
+        <div class="row">
+          {% if buttons %}
+            {% for b in buttons %}
+              <a href="{{ b.href }}" class="btn">{{ b.label }}</a>
+            {% endfor %}
+          {% else %}
+            <em>No interventions yet.</em>
+          {% endif %}
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <h3>Metric</h3>
-      <select id="metric">
-        <option value="total_power_ln" {% if default_metric=='total_power_ln' %}selected{% endif %}>Total Power (ln)</option>
-        <option value="lf">LF</option>
-        <option value="hf">HF</option>
-        <option value="rmssd">RMSSD</option>
-      </select>
-      <button id="load">Load</button>
-      <canvas id="chart" width="900" height="300"></canvas>
+    <!-- Metrics tab -->
+    <div class="tab-content" id="tab-metrics">
+      <!-- Chart 1: TP Residual (Last 7 Days) -->
+      <div style="margin-bottom: 24px;">
+        <select id="metric1" class="metric-select">
+          <option value="total_power_ms2_ln">Total Power (ln)</option>
+          <option value="total_power_ms2">Total Power</option>
+          <option value="lf_ms2">LF</option>
+          <option value="hf_ms2">HF</option>
+          <option value="lf_hf">LF/HF Ratio</option>
+          <option value="rmssd_ms">RMSSD</option>
+          <option value="sdnn_ms">SDNN</option>
+          <option value="hr_bpm">Heart Rate</option>
+          <option value="tp_residual">TP Residual (Intervention Effect)</option>
+          <option value="lfhf_residual">LF/HF Residual</option>
+          <option value="tp_residual_7d" selected>TP Residual (Last 7 Days)</option>
+          <option value="lfhf_residual_7d">LF/HF Residual (Last 7 Days)</option>
+          <option value="standing_hr">Standing Trial - HR (All Time)</option>
+          <option value="standing_hr_7d">Standing Trial - HR (Last 7 Days)</option>
+        </select>
+        <canvas id="chart1" width="900" height="400"></canvas>
+        <div id="legend1" class="intervention-legend">
+          <strong style="display: block; margin-bottom: 8px;">Intervention Legend:</strong>
+          <div class="legend-items"></div>
+        </div>
+      </div>
+
+      <!-- Chart 2: Standing Trial - HR (All Time) -->
+      <div style="margin-bottom: 24px;">
+        <select id="metric2" class="metric-select">
+          <option value="total_power_ms2_ln">Total Power (ln)</option>
+          <option value="total_power_ms2">Total Power</option>
+          <option value="lf_ms2">LF</option>
+          <option value="hf_ms2">HF</option>
+          <option value="lf_hf">LF/HF Ratio</option>
+          <option value="rmssd_ms">RMSSD</option>
+          <option value="sdnn_ms">SDNN</option>
+          <option value="hr_bpm">Heart Rate</option>
+          <option value="tp_residual">TP Residual (Intervention Effect)</option>
+          <option value="lfhf_residual">LF/HF Residual</option>
+          <option value="tp_residual_7d">TP Residual (Last 7 Days)</option>
+          <option value="lfhf_residual_7d">LF/HF Residual (Last 7 Days)</option>
+          <option value="standing_hr" selected>Standing Trial - HR (All Time)</option>
+          <option value="standing_hr_7d">Standing Trial - HR (Last 7 Days)</option>
+        </select>
+        <canvas id="chart2" width="900" height="400"></canvas>
+        <div id="legend2" class="intervention-legend">
+          <strong style="display: block; margin-bottom: 8px;">Intervention Legend:</strong>
+          <div class="legend-items"></div>
+        </div>
+      </div>
+
+      <!-- Chart 3: Total Power -->
+      <div style="margin-bottom: 24px;">
+        <select id="metric3" class="metric-select">
+          <option value="total_power_ms2_ln">Total Power (ln)</option>
+          <option value="total_power_ms2" selected>Total Power</option>
+          <option value="lf_ms2">LF</option>
+          <option value="hf_ms2">HF</option>
+          <option value="lf_hf">LF/HF Ratio</option>
+          <option value="rmssd_ms">RMSSD</option>
+          <option value="sdnn_ms">SDNN</option>
+          <option value="hr_bpm">Heart Rate</option>
+          <option value="tp_residual">TP Residual (Intervention Effect)</option>
+          <option value="lfhf_residual">LF/HF Residual</option>
+          <option value="tp_residual_7d">TP Residual (Last 7 Days)</option>
+          <option value="lfhf_residual_7d">LF/HF Residual (Last 7 Days)</option>
+          <option value="standing_hr">Standing Trial - HR (All Time)</option>
+          <option value="standing_hr_7d">Standing Trial - HR (Last 7 Days)</option>
+        </select>
+        <canvas id="chart3" width="900" height="400"></canvas>
+        <div id="legend3" class="intervention-legend">
+          <strong style="display: block; margin-bottom: 8px;">Intervention Legend:</strong>
+          <div class="legend-items"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Intervention tab -->
+    <div class="tab-content" id="tab-new-intervention">
+      <div class="card">
+        <h3>New Intervention</h3>
+        <form id="interventionForm">
+          <div style="margin-bottom: 12px;">
+            <label for="name" style="display: block; margin-bottom: 4px;">Name:</label>
+            <input type="text" id="name" name="name" required style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label for="start_date" style="display: block; margin-bottom: 4px;">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" required style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label for="duration_weeks" style="display: block; margin-bottom: 4px;">Duration (weeks):</label>
+            <input type="number" id="duration_weeks" name="duration_weeks" min="1" required style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label for="frequency_per_week" style="display: block; margin-bottom: 4px;">Frequency per week:</label>
+            <input type="number" id="frequency_per_week" name="frequency_per_week" min="1" required style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <button type="submit" style="padding: 10px 20px; font-size: 14px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Create Intervention</button>
+          <div id="interventionStatus" style="margin-top: 12px;"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Manage Interventions</h3>
+        <div id="interventionsList" style="margin-top: 12px;">
+          <p style="color: #666;">Loading interventions...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maintenance tab -->
+    <div class="tab-content" id="tab-maintenance">
+      <div class="card">
+        <h3>Maintenance</h3>
+        <button id="refreshBtn">Refresh data</button>
+        <pre id="refreshOut" style="white-space:pre-wrap"></pre>
+      </div>
     </div>
   </div>
 

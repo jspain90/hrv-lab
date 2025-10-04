@@ -23,11 +23,7 @@ class Intervention(Base):
     start_date: Mapped[dt.date] = mapped_column()
     duration_weeks: Mapped[int] = mapped_column(Integer)
     freq_per_week: Mapped[int] = mapped_column(Integer)
-    expected_metric: Mapped[str] = mapped_column(String(80))
-    expected_direction: Mapped[str] = mapped_column(String(10))
-    hypothesis_text: Mapped[Optional[str]] = mapped_column(Text)
-    posture_filter: Mapped[Optional[str]] = mapped_column(String(40))
-    time_of_day_filter: Mapped[Optional[str]] = mapped_column(String(40))
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
     user: Mapped["User"] = relationship(back_populates="interventions")
     compliance_events: Mapped[List["ComplianceEvent"]] = relationship(back_populates="intervention")
     quick_tokens: Mapped[List["QuickToken"]] = relationship(back_populates="intervention")
@@ -41,26 +37,6 @@ class ComplianceEvent(Base):
     notes: Mapped[Optional[str]] = mapped_column(String(500))
     source: Mapped[str] = mapped_column(String(40), default="api")
     intervention: Mapped["Intervention"] = relationship(back_populates="compliance_events")
-
-class Reading(Base):
-    __tablename__ = "readings"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    started_at: Mapped[dt.datetime] = mapped_column(DateTime, index=True)
-    posture: Mapped[Optional[str]] = mapped_column(String(20))
-    duration_s: Mapped[Optional[int]] = mapped_column(Integer)
-    source_file: Mapped[Optional[str]] = mapped_column(String(250))
-    source_type: Mapped[Optional[str]] = mapped_column(String(50))
-    metrics: Mapped[List["Metric"]] = relationship(back_populates="reading", cascade="all, delete-orphan")
-
-class Metric(Base):
-    __tablename__ = "metrics"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    reading_id: Mapped[int] = mapped_column(ForeignKey("readings.id"))
-    metric: Mapped[str] = mapped_column(String(60), index=True)
-    value: Mapped[float] = mapped_column(Float)
-    unit: Mapped[str] = mapped_column(String(20), default="")
-    reading: Mapped["Reading"] = relationship(back_populates="metrics")
-    __table_args__ = (UniqueConstraint("reading_id", "metric", name="uix_reading_metric"),)
 
 class DailyAggregate(Base):
     __tablename__ = "daily_aggregates"

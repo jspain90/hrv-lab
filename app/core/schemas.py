@@ -9,11 +9,7 @@ class InterventionIn(BaseModel):
     start_date: dt.date
     duration_weeks: int
     freq_per_week: int
-    expected_metric: str
-    expected_direction: str
-    hypothesis_text: Optional[str] = None
-    posture_filter: Optional[str] = None
-    time_of_day_filter: Optional[str] = None
+    active: bool = True
 
 class InterventionOut(BaseModel):
     id: int
@@ -21,9 +17,7 @@ class InterventionOut(BaseModel):
     start_date: dt.date
     duration_weeks: int
     freq_per_week: int
-    expected_metric: str
-    expected_direction: str
-    hypothesis_text: Optional[str]
+    active: bool
     class Config:
         from_attributes = True
 
@@ -36,3 +30,21 @@ class ComplianceIn(BaseModel):
 class SeriesOut(BaseModel):
     t: List[str]
     v: List[float]
+
+class QuickInterventionIn(BaseModel):
+    name: str
+    start_date: dt.date
+    duration_weeks: int
+    frequency_per_week: int
+
+class ComplianceEventOut(BaseModel):
+    timestamp: str
+    intervention_id: int
+    intervention_name: str
+    class Config:
+        from_attributes = True
+
+class DualSeriesOut(BaseModel):
+    t: List[str]
+    v1: List[float]
+    v2: List[float]

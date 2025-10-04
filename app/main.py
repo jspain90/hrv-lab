@@ -1,6 +1,7 @@
 from __future__ import annotations
 import os
 from fastapi import FastAPI, UploadFile, File, Depends
+from fastapi.responses import FileResponse
 from .core.db import get_db
 from .core.settings import settings
 from .core import models  # ensures tables are created
@@ -9,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 # Routers
-from .routers import interventions, compliance, metrics, dashboard, dev, refresh
+from .routers import interventions, compliance, metrics, dashboard, dev, refresh, weather, analysis
 
 def create_app() -> FastAPI:
     app = FastAPI(title="HRV-Lab LAN API", version="0.2.0")
@@ -26,6 +27,13 @@ def create_app() -> FastAPI:
     app.include_router(dashboard.router)
     app.include_router(dev.router)
     app.include_router(refresh.router)
+    app.include_router(weather.router)
+    app.include_router(analysis.router)
+
+    # Favicon route
+    @app.get("/favicon.ico")
+    async def favicon():
+        return FileResponse("favicon.ico")
 
     return app
 
