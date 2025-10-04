@@ -57,7 +57,7 @@
         </select>
         <canvas id="chart1" width="900" height="400"></canvas>
         <div id="legend1" class="intervention-legend">
-          <strong style="display: block; margin-bottom: 8px;">Intervention Legend:</strong>
+          <strong>Intervention Legend:</strong>
           <div class="legend-items"></div>
         </div>
       </div>
@@ -82,7 +82,7 @@
         </select>
         <canvas id="chart2" width="900" height="400"></canvas>
         <div id="legend2" class="intervention-legend">
-          <strong style="display: block; margin-bottom: 8px;">Intervention Legend:</strong>
+          <strong>Intervention Legend:</strong>
           <div class="legend-items"></div>
         </div>
       </div>
@@ -107,7 +107,7 @@
         </select>
         <canvas id="chart3" width="900" height="400"></canvas>
         <div id="legend3" class="intervention-legend">
-          <strong style="display: block; margin-bottom: 8px;">Intervention Legend:</strong>
+          <strong>Intervention Legend:</strong>
           <div class="legend-items"></div>
         </div>
       </div>
@@ -119,30 +119,30 @@
         <h3>New Intervention</h3>
         <form id="interventionForm">
           <div style="margin-bottom: 12px;">
-            <label for="name" style="display: block; margin-bottom: 4px;">Name:</label>
-            <input type="text" id="name" name="name" required style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required style="width: 100%;">
           </div>
           <div style="margin-bottom: 12px;">
-            <label for="start_date" style="display: block; margin-bottom: 4px;">Start Date:</label>
-            <input type="date" id="start_date" name="start_date" required style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" required style="width: 100%;">
           </div>
           <div style="margin-bottom: 12px;">
-            <label for="duration_weeks" style="display: block; margin-bottom: 4px;">Duration (weeks):</label>
-            <input type="number" id="duration_weeks" name="duration_weeks" min="1" required style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">
+            <label for="duration_weeks">Duration (weeks):</label>
+            <input type="number" id="duration_weeks" name="duration_weeks" min="1" required style="width: 100%;">
           </div>
           <div style="margin-bottom: 12px;">
-            <label for="frequency_per_week" style="display: block; margin-bottom: 4px;">Frequency per week:</label>
-            <input type="number" id="frequency_per_week" name="frequency_per_week" min="1" required style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">
+            <label for="frequency_per_week">Frequency per week:</label>
+            <input type="number" id="frequency_per_week" name="frequency_per_week" min="1" required style="width: 100%;">
           </div>
-          <button type="submit" style="padding: 10px 20px; font-size: 14px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Create Intervention</button>
-          <div id="interventionStatus" style="margin-top: 12px;"></div>
+          <button type="submit">Create Intervention</button>
+          <div id="interventionStatus"></div>
         </form>
       </div>
 
       <div class="card">
         <h3>Manage Interventions</h3>
         <div id="interventionsList" style="margin-top: 12px;">
-          <p style="color: #666;">Loading interventions...</p>
+          <p style="color: #b0b3b8;">Loading interventions...</p>
         </div>
       </div>
     </div>
@@ -152,7 +152,7 @@
       <div class="card">
         <h3>Maintenance</h3>
         <button id="refreshBtn">Refresh data</button>
-        <pre id="refreshOut" style="white-space:pre-wrap"></pre>
+        <pre id="refreshOut"></pre>
       </div>
     </div>
   </div>

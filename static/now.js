@@ -141,7 +141,7 @@ function drawDualSeries(chartNum, ts, primaryVals, secondaryVals, label, complia
 
   // Add time labels on x-axis (reuse logic from draw function)
   if (ts.length > 0) {
-    ctx.fillStyle = '#666';
+    ctx.fillStyle = '#9ca3af';
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
 
@@ -325,7 +325,7 @@ function drawDualSeries(chartNum, ts, primaryVals, secondaryVals, label, complia
   // Draw hr_bpm data points (foreground layer)
   if (is7Day) {
     // 7-day view: connected line graph
-    ctx.strokeStyle = '#000'; // Black
+    ctx.strokeStyle = '#d1d5db'; // Very light gray
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     let started=false;
@@ -338,7 +338,7 @@ function drawDualSeries(chartNum, ts, primaryVals, secondaryVals, label, complia
     ctx.stroke();
   } else {
     // All-time view: scatter plot (50% opacity)
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillStyle = 'rgba(209, 213, 219, 0.5)'; // Very light gray with 50% opacity
     for(let i=0; i<primaryVals.length; i++){
       const v=primaryVals[i];
       if(!Number.isFinite(v)) continue;
@@ -369,7 +369,7 @@ function draw(chartNum, ts, vals, label, complianceEvents = []){
 
   // Add time labels on x-axis
   if (ts.length > 0) {
-    ctx.fillStyle = '#666';
+    ctx.fillStyle = '#9ca3af';
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
 
@@ -450,11 +450,11 @@ function draw(chartNum, ts, vals, label, complianceEvents = []){
     ctx.textAlign = 'left';
   }
 
-  // For residuals, draw zero line in BLACK
+  // For residuals, draw zero line in very light gray
   const isResidual = label.includes('residual');
   if (isResidual && vmin < 0 && vmax > 0) {
     const y0 = yscale(0);
-    ctx.strokeStyle = '#000';
+    ctx.strokeStyle = '#d1d5db'; // Very light gray
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(pad, y0);
@@ -462,7 +462,7 @@ function draw(chartNum, ts, vals, label, complianceEvents = []){
     ctx.stroke();
 
     // Label for zero line
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = '#e4e6eb';
     ctx.font = '12px sans-serif';
     ctx.fillText('0 (baseline)', W-pad+5, y0+4);
   }
@@ -565,7 +565,7 @@ function draw(chartNum, ts, vals, label, complianceEvents = []){
   // Data visualization: scatter plot for long-term, line for 7-day
   if (is7Day) {
     // 7-day view: connected line graph (full opacity)
-    ctx.strokeStyle = isResidual ? '#3498db' : '#000';
+    ctx.strokeStyle = isResidual ? '#3498db' : '#d1d5db'; // Very light gray for non-residuals
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     let started=false;
@@ -577,7 +577,7 @@ function draw(chartNum, ts, vals, label, complianceEvents = []){
     ctx.stroke();
   } else {
     // Non-7-day view: scatter plot (50% opacity)
-    const dotColor = isResidual ? 'rgba(52, 152, 219, 0.5)' : 'rgba(0, 0, 0, 0.5)'; // 50% opacity
+    const dotColor = isResidual ? 'rgba(52, 152, 219, 0.5)' : 'rgba(209, 213, 219, 0.5)'; // Very light gray with 50% opacity
     ctx.fillStyle = dotColor;
 
     for(let i=0;i<vals.length;i++){

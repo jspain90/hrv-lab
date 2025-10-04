@@ -1,20 +1,261 @@
-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 24px; }
-.wrap { max-width: 960px; margin: auto; }
-.card { padding: 16px; border: 1px solid #ddd; border-radius: 12px; margin: 12px 0; }
-.row { display: flex; gap: 12px; flex-wrap: wrap; }
-.btn { display: inline-block; padding: 12px 18px; font-size: 16px; border: 1px solid #ddd; border-radius: 10px; text-decoration: none; }
-#chart { max-width: 100%; border: 1px solid #eee; border-radius: 8px; margin-top: 12px; }
+/* POTS Laboratory - Semi-Dark Mode Theme */
 
-/* Analysis tab styles */
-.metric-select { padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 12px; }
-canvas[id^="chart"] { max-width: 100%; margin-top: 12px; display: block; }
-.intervention-legend { margin-top: 16px; padding: 12px; background: #f5f5f5; border-radius: 4px; display: none; }
-.intervention-legend .legend-items { display: flex; flex-wrap: wrap; gap: 12px; }
+/* Base Styles */
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  margin: 24px;
+  background: #1a1d23;
+  color: #e4e6eb;
+}
 
-/* Tab navigation */
-.tab-nav { display: flex; gap: 4px; margin-bottom: 1.5em; border-bottom: 2px solid #ddd; }
-.tab-button { background: #e8e8e8; border: none; padding: 10px 20px; cursor: pointer; font-size: 14px; font-weight: 500; border-radius: 4px 4px 0 0; transition: background 0.2s; }
-.tab-button:hover { background: #d0d0d0; }
-.tab-button.active { background: #fff; border-bottom: 2px solid #fff; margin-bottom: -2px; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+.wrap {
+  max-width: 960px;
+  margin: auto;
+}
+
+h1 {
+  color: #e4e6eb;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+h3 {
+  color: #e4e6eb;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Cards */
+.card {
+  padding: 20px;
+  background: #24272e;
+  border: 1px solid #3a3d44;
+  border-radius: 12px;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Layout */
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 12px 18px;
+  font-size: 16px;
+  background: #2d3139;
+  color: #e4e6eb;
+  border: 1px solid #3a3d44;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  background: #363942;
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+}
+
+button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+button[type="submit"] {
+  background: #10b981;
+}
+
+button[type="submit"]:hover {
+  background: #059669;
+}
+
+/* Form Elements */
+input,
+select,
+.metric-select {
+  background: #2d3139;
+  color: #e4e6eb;
+  border: 1px solid #3a3d44;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+label {
+  color: #9ca3af;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+/* Analysis Tab Styles */
+.metric-select {
+  margin-bottom: 12px;
+  width: 100%;
+  max-width: 300px;
+}
+
+canvas[id^="chart"] {
+  max-width: 100%;
+  margin-top: 12px;
+  display: block;
+  background: #1e2127;
+  border-radius: 8px;
+}
+
+.intervention-legend {
+  margin-top: 16px;
+  padding: 14px;
+  background: #2d3139;
+  border: 1px solid #3a3d44;
+  border-radius: 8px;
+  display: none;
+}
+
+.intervention-legend strong {
+  color: #e4e6eb;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.intervention-legend .legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Tab Navigation */
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 1.5em;
+  border-bottom: 2px solid #3a3d44;
+}
+
+.tab-button {
+  background: #2d3139;
+  color: #b0b3b8;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.tab-button:hover {
+  background: #363942;
+  color: #e4e6eb;
+}
+
+.tab-button.active {
+  background: #24272e;
+  color: #3b82f6;
+  border-color: #3a3d44;
+  border-bottom-color: #24272e;
+  margin-bottom: -2px;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #2d3139;
+  color: #9ca3af;
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid #3a3d44;
+  font-weight: 500;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #3a3d44;
+  color: #e4e6eb;
+}
+
+tr:hover td {
+  background: #2d3139;
+}
+
+/* Special Elements */
+pre {
+  background: #1e2127;
+  color: #e4e6eb;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #3a3d44;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+em {
+  color: #b0b3b8;
+  font-style: italic;
+}
+
+a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+/* Status Messages */
+#interventionStatus {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Legacy Chart Support */
+#chart {
+  max-width: 100%;
+  background: #1e2127;
+  border-radius: 8px;
+  margin-top: 12px;
+}
