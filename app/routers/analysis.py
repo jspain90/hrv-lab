@@ -3,6 +3,9 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from ..core.db import get_db
+from ..core.models import Intervention, ComplianceEvent
+from ..core.schemas import InterventionAnalysisOut
+from ..analysis.tau_u import calculate_tau_u
 from pydantic import BaseModel
 import datetime as dt
 import numpy as np
@@ -216,3 +219,133 @@ def intervention_residuals(
             "lfhf": "better balance" if result and result[1] and abs(result[1]) < 0.1 else "dysregulated"
         }
     }
+
+
+@router.get("/intervention-effectiveness", response_model=list[InterventionAnalysisOut])
+def get_intervention_effectiveness(db: Session = Depends(get_db)):
+    """
+    Analyze effectiveness of completed interventions using Tau-U.
+
+    For each completed intervention (active=true, current_date > end_date):
+    - Compare intervention period vs matched baseline period (same length)
+    - Calculate Tau-U for TP Residual and Standing Trial HR
+    - Include compliance percentage
+    """
+    today = dt.date.today()
+
+    # Get all active interventions
+    interventions = db.query(Intervention).filter_by(active=True).all()
+
+    results = []
+    for intervention in interventions:
+        # Calculate dates
+        intervention_start = intervention.start_date
+        intervention_duration_days = intervention.duration_weeks * 7
+        intervention_end = intervention_start + dt.timedelta(days=intervention_duration_days)
+
+        # Only process completed interventions
+        if today <= intervention_end:
+            continue
+
+        # Calculate matched baseline period (same length as intervention)
+        baseline_start = intervention_start - dt.timedelta(days=intervention_duration_days)
+        baseline_end = intervention_start - dt.timedelta(days=1)
+
+        # === TP Residual Analysis ===
+        # Baseline data
+        tp_baseline_query = text("""
+            SELECT tp_residual
+            FROM hrv_predictions
+            WHERE timestamp >= :baseline_start
+            AND timestamp <= :baseline_end
+            AND tp_residual IS NOT NULL
+            ORDER BY timestamp ASC
+        """)
+        tp_baseline_result = db.execute(tp_baseline_query, {
+            "baseline_start": baseline_start.isoformat(),
+            "baseline_end": baseline_end.isoformat() + " 23:59:59"
+        }).fetchall()
+        tp_baseline = [row[0] for row in tp_baseline_result]
+
+        # Intervention data
+        tp_intervention_query = text("""
+            SELECT tp_residual
+            FROM hrv_predictions
+            WHERE timestamp >= :intervention_start
+            AND timestamp <= :intervention_end
+            AND tp_residual IS NOT NULL
+            ORDER BY timestamp ASC
+        """)
+        tp_intervention_result = db.execute(tp_intervention_query, {
+            "intervention_start": intervention_start.isoformat(),
+            "intervention_end": intervention_end.isoformat() + " 23:59:59"
+        }).fetchall()
+        tp_intervention = [row[0] for row in tp_intervention_result]
+
+        # Calculate Tau-U for TP Residual
+        tp_tau_u, tp_p_value, tp_effect = calculate_tau_u(tp_baseline, tp_intervention)
+
+        # === Standing Trial HR Analysis ===
+        # Baseline data
+        hr_baseline_query = text("""
+            SELECT hr_bpm
+            FROM standing_trials
+            WHERE timestamp >= :baseline_start
+            AND timestamp <= :baseline_end
+            AND hr_bpm IS NOT NULL
+            ORDER BY timestamp ASC
+        """)
+        hr_baseline_result = db.execute(hr_baseline_query, {
+            "baseline_start": baseline_start.isoformat(),
+            "baseline_end": baseline_end.isoformat() + " 23:59:59"
+        }).fetchall()
+        hr_baseline = [row[0] for row in hr_baseline_result]
+
+        # Intervention data
+        hr_intervention_query = text("""
+            SELECT hr_bpm
+            FROM standing_trials
+            WHERE timestamp >= :intervention_start
+            AND timestamp <= :intervention_end
+            AND hr_bpm IS NOT NULL
+            ORDER BY timestamp ASC
+        """)
+        hr_intervention_result = db.execute(hr_intervention_query, {
+            "intervention_start": intervention_start.isoformat(),
+            "intervention_end": intervention_end.isoformat() + " 23:59:59"
+        }).fetchall()
+        hr_intervention = [row[0] for row in hr_intervention_result]
+
+        # Calculate Tau-U for Standing HR
+        hr_tau_u, hr_p_value, hr_effect = calculate_tau_u(hr_baseline, hr_intervention)
+
+        # === Compliance Calculation ===
+        total_expected_compliance = intervention.freq_per_week * intervention.duration_weeks
+        completed_compliance = db.query(ComplianceEvent).filter(
+            ComplianceEvent.intervention_id == intervention.id,
+            ComplianceEvent.ts >= intervention_start,
+            ComplianceEvent.ts <= intervention_end
+        ).count()
+
+        percent_compliance = (completed_compliance / total_expected_compliance * 100) if total_expected_compliance > 0 else 0.0
+
+        # Store results
+        results.append(InterventionAnalysisOut(
+            intervention_id=intervention.id,
+            intervention_name=intervention.name,
+            start_date=intervention_start.isoformat(),
+            end_date=intervention_end.isoformat(),
+            baseline_start=baseline_start.isoformat(),
+            baseline_end=baseline_end.isoformat(),
+            tp_residual_tau_u=round(tp_tau_u, 3),
+            tp_residual_p_value=round(tp_p_value, 4),
+            tp_residual_effect_size=tp_effect,
+            standing_hr_tau_u=round(hr_tau_u, 3),
+            standing_hr_p_value=round(hr_p_value, 4),
+            standing_hr_effect_size=hr_effect,
+            percent_compliance=round(percent_compliance, 1),
+            baseline_n=len(tp_baseline),  # Use TP baseline as representative sample size
+            intervention_n=len(tp_intervention)
+        ))
+
+    return results

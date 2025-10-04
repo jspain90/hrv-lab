@@ -59,3 +59,20 @@ class ComplianceStatsOut(BaseModel):
     percent_trial_completed: float
     percent_expected_compliance: float
     percent_completed_compliance: float
+
+class InterventionAnalysisOut(BaseModel):
+    intervention_id: int
+    intervention_name: str
+    start_date: str
+    end_date: str
+    baseline_start: str
+    baseline_end: str
+    tp_residual_tau_u: float
+    tp_residual_p_value: float
+    tp_residual_effect_size: str
+    standing_hr_tau_u: float
+    standing_hr_p_value: float
+    standing_hr_effect_size: str
+    percent_compliance: float
+    baseline_n: int
+    intervention_n: int

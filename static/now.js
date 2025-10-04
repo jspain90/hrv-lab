@@ -961,6 +961,131 @@ function switchComplianceFilter(filter) {
   loadComplianceStats(filter);
 }
 
+// Load intervention analysis (Tau-U)
+async function loadInterventionAnalysis() {
+  const container = document.getElementById('interventionAnalysisContainer');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/analysis/intervention-effectiveness');
+    if (!res.ok) throw new Error(res.statusText);
+
+    const analyses = await res.json();
+
+    if (analyses.length === 0) {
+      container.innerHTML = `<p style="color: #9ca3af;">No completed interventions found for analysis.</p>`;
+      return;
+    }
+
+    // Build table
+    let html = `
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <thead>
+          <tr style="border-bottom: 2px solid #3a3d44; background: #2a2d34;">
+            <th style="padding: 12px 8px; text-align: left;">Intervention</th>
+            <th style="padding: 12px 8px; text-align: center;">Intervention Period</th>
+            <th style="padding: 12px 8px; text-align: center;">Baseline Period</th>
+            <th style="padding: 12px 8px; text-align: center;">TP Residual Tau-U</th>
+            <th style="padding: 12px 8px; text-align: center;">TP Effect</th>
+            <th style="padding: 12px 8px; text-align: center;">Standing HR Tau-U</th>
+            <th style="padding: 12px 8px; text-align: center;">HR Effect</th>
+            <th style="padding: 12px 8px; text-align: center;">% Compliance</th>
+            <th style="padding: 12px 8px; text-align: center;">Samples (B/I)</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    analyses.forEach(analysis => {
+      // Helper function to get color based on significance and direction
+      function getEffectColor(tauU, pValue) {
+        if (pValue >= 0.05) return '#9ca3af'; // Gray for non-significant
+        return tauU > 0 ? '#10b981' : '#ef4444'; // Green for positive, red for negative
+      }
+
+      // Helper function to format effect size label
+      function formatEffect(effectLabel) {
+        const labels = {
+          'negligible': 'Negligible',
+          'small_to_medium': 'Small-Med',
+          'medium_to_large': 'Med-Large',
+          'large': 'Large',
+          'insufficient_data': 'Insufficient'
+        };
+        return labels[effectLabel] || effectLabel;
+      }
+
+      const tpColor = getEffectColor(analysis.tp_residual_tau_u, analysis.tp_residual_p_value);
+      const hrColor = getEffectColor(analysis.standing_hr_tau_u, analysis.standing_hr_p_value);
+
+      // Compliance color
+      let complianceColor = '#9ca3af';
+      if (analysis.percent_compliance >= 80) {
+        complianceColor = '#10b981';
+      } else if (analysis.percent_compliance >= 60) {
+        complianceColor = '#f59e0b';
+      } else {
+        complianceColor = '#ef4444';
+      }
+
+      html += `
+        <tr style="border-bottom: 1px solid #3a3d44;">
+          <td style="padding: 8px;">${analysis.intervention_name}</td>
+          <td style="padding: 8px; text-align: center; font-size: 12px;">
+            ${analysis.start_date}<br>to ${analysis.end_date}
+          </td>
+          <td style="padding: 8px; text-align: center; font-size: 12px;">
+            ${analysis.baseline_start}<br>to ${analysis.baseline_end}
+          </td>
+          <td style="padding: 8px; text-align: center; color: ${tpColor}; font-weight: bold;">
+            ${analysis.tp_residual_tau_u.toFixed(2)}<br>
+            <span style="font-size: 11px; font-weight: normal; opacity: 0.8;">p=${analysis.tp_residual_p_value.toFixed(3)}</span>
+          </td>
+          <td style="padding: 8px; text-align: center; color: ${tpColor};">
+            ${formatEffect(analysis.tp_residual_effect_size)}
+          </td>
+          <td style="padding: 8px; text-align: center; color: ${hrColor}; font-weight: bold;">
+            ${analysis.standing_hr_tau_u.toFixed(2)}<br>
+            <span style="font-size: 11px; font-weight: normal; opacity: 0.8;">p=${analysis.standing_hr_p_value.toFixed(3)}</span>
+          </td>
+          <td style="padding: 8px; text-align: center; color: ${hrColor};">
+            ${formatEffect(analysis.standing_hr_effect_size)}
+          </td>
+          <td style="padding: 8px; text-align: center; color: ${complianceColor}; font-weight: bold;">
+            ${analysis.percent_compliance.toFixed(1)}%
+          </td>
+          <td style="padding: 8px; text-align: center; font-size: 12px;">
+            ${analysis.baseline_n} / ${analysis.intervention_n}
+          </td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+
+    // Add legend
+    html += `
+      <div style="margin-top: 16px; padding: 12px; background: #2a2d34; border-radius: 8px; font-size: 13px;">
+        <strong>Legend:</strong>
+        <div style="display: flex; gap: 20px; margin-top: 8px; flex-wrap: wrap;">
+          <div><span style="color: #10b981;">●</span> Significant positive effect (p < 0.05)</div>
+          <div><span style="color: #ef4444;">●</span> Significant negative effect (p < 0.05)</div>
+          <div><span style="color: #9ca3af;">●</span> Non-significant effect</div>
+        </div>
+        <div style="margin-top: 8px; opacity: 0.8;">
+          <strong>Tau-U Interpretation:</strong> Measures non-overlap between baseline and intervention phases, controlling for baseline trend.
+          Values range from -1 to +1, with larger absolute values indicating stronger effects.
+        </div>
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+  } catch (error) {
+    container.innerHTML = `<p style="color: #f44336;">Error loading intervention analysis: ${error.message}</p>`;
+  }
+}
+
 // Load interventions list when page loads
 if (document.getElementById('interventionsList')) {
   loadInterventionsList();
@@ -969,4 +1094,9 @@ if (document.getElementById('interventionsList')) {
 // Load compliance stats when page loads
 if (document.getElementById('complianceStatsContainer')) {
   loadComplianceStats('active');
+}
+
+// Load intervention analysis when page loads
+if (document.getElementById('interventionAnalysisContainer')) {
+  loadInterventionAnalysis();
 }
