@@ -704,7 +704,7 @@ async function loadInterventionsList() {
             <th style="text-align: center; padding: 8px;">Duration (weeks)</th>
             <th style="text-align: center; padding: 8px;">Frequency/week</th>
             <th style="text-align: center; padding: 8px;">Active</th>
-            <th style="text-align: center; padding: 8px;">Action</th>
+            <th style="text-align: center; padding: 8px;">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -712,8 +712,12 @@ async function loadInterventionsList() {
 
     interventions.forEach(intervention => {
       const activeLabel = intervention.active ? 'Yes' : 'No';
-      const activeColor = intervention.active ? '#4CAF50' : '#999';
-      const buttonText = intervention.active ? 'Deactivate' : 'Activate';
+      const activeColor = intervention.active ? '#10b981' : '#9ca3af';
+      const toggleButtonText = intervention.active ? 'Deactivate' : 'Activate';
+      const toggleButtonColor = intervention.active ? '#f59e0b' : '#10b981';
+
+      // Escape intervention name for use in onclick attributes
+      const escapedName = intervention.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
       html += `
         <tr style="border-bottom: 1px solid #eee;">
@@ -723,11 +727,23 @@ async function loadInterventionsList() {
           <td style="text-align: center; padding: 8px;">${intervention.freq_per_week}</td>
           <td style="text-align: center; padding: 8px; color: ${activeColor}; font-weight: bold;">${activeLabel}</td>
           <td style="text-align: center; padding: 8px;">
-            <button
-              onclick="toggleInterventionActive(${intervention.id})"
-              style="padding: 6px 12px; font-size: 12px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">
-              ${buttonText}
-            </button>
+            <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
+              <button
+                onclick="openEditModal(${intervention.id}, '${escapedName}', '${intervention.start_date}', ${intervention.duration_weeks}, ${intervention.freq_per_week})"
+                style="padding: 6px 12px; font-size: 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Edit
+              </button>
+              <button
+                onclick="toggleInterventionActive(${intervention.id})"
+                style="padding: 6px 12px; font-size: 12px; background: ${toggleButtonColor}; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                ${toggleButtonText}
+              </button>
+              <button
+                onclick="deleteIntervention(${intervention.id}, '${escapedName}')"
+                style="padding: 6px 12px; font-size: 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Delete
+              </button>
+            </div>
           </td>
         </tr>
       `;
@@ -760,7 +776,197 @@ async function toggleInterventionActive(interventionId) {
   }
 }
 
+// Helper function to escape HTML in intervention names
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Open edit modal and populate with intervention data
+function openEditModal(id, name, startDate, durationWeeks, frequencyPerWeek) {
+  const modal = document.getElementById('editModal');
+  document.getElementById('edit_id').value = id;
+  document.getElementById('edit_name').value = name;
+  document.getElementById('edit_start_date').value = startDate;
+  document.getElementById('edit_duration_weeks').value = durationWeeks;
+  document.getElementById('edit_frequency_per_week').value = frequencyPerWeek;
+  modal.style.display = 'flex';
+}
+
+// Close edit modal
+function closeEditModal() {
+  const modal = document.getElementById('editModal');
+  modal.style.display = 'none';
+}
+
+// Handle edit form submission
+document.getElementById('editInterventionForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const interventionId = document.getElementById('edit_id').value;
+  const payload = {
+    name: document.getElementById('edit_name').value,
+    start_date: document.getElementById('edit_start_date').value,
+    duration_weeks: parseInt(document.getElementById('edit_duration_weeks').value),
+    frequency_per_week: parseInt(document.getElementById('edit_frequency_per_week').value)
+  };
+
+  try {
+    const res = await fetch(`/interventions/${interventionId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(res.statusText);
+
+    closeEditModal();
+    loadInterventionsList();
+  } catch (error) {
+    alert(`Error updating intervention: ${error.message}`);
+  }
+});
+
+// Delete intervention with confirmation
+async function deleteIntervention(interventionId, interventionName) {
+  const confirmed = confirm(
+    `Are you sure you want to delete "${interventionName}"?\n\n` +
+    `This will also delete all associated compliance events and tokens for this intervention.\n\n` +
+    `This action cannot be undone.`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`/interventions/${interventionId}`, {
+      method: 'DELETE'
+    });
+
+    if (!res.ok) throw new Error(res.statusText);
+
+    const result = await res.json();
+
+    alert(
+      `Successfully deleted intervention "${interventionName}".\n\n` +
+      `Deleted ${result.deleted_compliance_events} compliance event(s) and ${result.deleted_tokens} token(s).`
+    );
+
+    loadInterventionsList();
+  } catch (error) {
+    alert(`Error deleting intervention: ${error.message}`);
+  }
+}
+
+// Close modal when clicking outside of it
+document.getElementById('editModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'editModal') {
+    closeEditModal();
+  }
+});
+
+// Current compliance filter
+let currentComplianceFilter = 'active';
+
+// Load compliance statistics table
+async function loadComplianceStats(filter = 'active') {
+  const container = document.getElementById('complianceStatsContainer');
+  if (!container) return;
+
+  try {
+    const res = await fetch(`/interventions/compliance-stats?filter=${filter}`);
+    if (!res.ok) throw new Error(res.statusText);
+
+    const stats = await res.json();
+
+    if (stats.length === 0) {
+      container.innerHTML = `<p style="color: #9ca3af;">No ${filter} interventions found.</p>`;
+      return;
+    }
+
+    // Build table
+    let html = `
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <thead>
+          <tr style="border-bottom: 2px solid #3a3d44; background: #2a2d34;">
+            <th style="padding: 12px 8px; text-align: left;">Intervention Name</th>
+            <th style="padding: 12px 8px; text-align: center;">Start Date</th>
+            <th style="padding: 12px 8px; text-align: center;">End Date</th>
+            <th style="padding: 12px 8px; text-align: center;">Total Expected</th>
+            <th style="padding: 12px 8px; text-align: center;">Completed</th>
+            <th style="padding: 12px 8px; text-align: center;">% Trial Done</th>
+            <th style="padding: 12px 8px; text-align: center;">Expected at %</th>
+            <th style="padding: 12px 8px; text-align: center;">% Compliance</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    stats.forEach(stat => {
+      // Color code % compliance
+      let complianceColor = '#9ca3af'; // gray
+      if (stat.percent_completed_compliance >= 80) {
+        complianceColor = '#10b981'; // green
+      } else if (stat.percent_completed_compliance >= 60) {
+        complianceColor = '#f59e0b'; // orange
+      } else {
+        complianceColor = '#ef4444'; // red
+      }
+
+      html += `
+        <tr style="border-bottom: 1px solid #3a3d44;">
+          <td style="padding: 8px;">${stat.intervention_name}</td>
+          <td style="padding: 8px; text-align: center;">${stat.start_date}</td>
+          <td style="padding: 8px; text-align: center;">${stat.end_date}</td>
+          <td style="padding: 8px; text-align: center;">${stat.total_expected_compliance}</td>
+          <td style="padding: 8px; text-align: center;">${stat.completed_compliance}</td>
+          <td style="padding: 8px; text-align: center;">${stat.percent_trial_completed}%</td>
+          <td style="padding: 8px; text-align: center;">${stat.percent_expected_compliance.toFixed(1)}</td>
+          <td style="padding: 8px; text-align: center; color: ${complianceColor}; font-weight: bold;">
+            ${stat.percent_completed_compliance}%
+          </td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+  } catch (error) {
+    container.innerHTML = `<p style="color: #f44336;">Error loading compliance stats: ${error.message}</p>`;
+  }
+}
+
+// Switch between active and completed interventions
+function switchComplianceFilter(filter) {
+  currentComplianceFilter = filter;
+
+  // Update button styles
+  const activeBtn = document.getElementById('activeFilterBtn');
+  const completedBtn = document.getElementById('completedFilterBtn');
+
+  if (filter === 'active') {
+    activeBtn.style.background = '#3b82f6';
+    activeBtn.style.fontWeight = 'bold';
+    completedBtn.style.background = '#6b7280';
+    completedBtn.style.fontWeight = 'normal';
+  } else {
+    activeBtn.style.background = '#6b7280';
+    activeBtn.style.fontWeight = 'normal';
+    completedBtn.style.background = '#3b82f6';
+    completedBtn.style.fontWeight = 'bold';
+  }
+
+  // Reload data
+  loadComplianceStats(filter);
+}
+
 // Load interventions list when page loads
 if (document.getElementById('interventionsList')) {
   loadInterventionsList();
+}
+
+// Load compliance stats when page loads
+if (document.getElementById('complianceStatsContainer')) {
+  loadComplianceStats('active');
 }

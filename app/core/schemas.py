@@ -48,3 +48,14 @@ class DualSeriesOut(BaseModel):
     t: List[str]
     v1: List[float]
     v2: List[float]
+
+class ComplianceStatsOut(BaseModel):
+    intervention_id: int
+    intervention_name: str
+    start_date: str
+    end_date: str
+    total_expected_compliance: int
+    completed_compliance: int
+    percent_trial_completed: float
+    percent_expected_compliance: float
+    percent_completed_compliance: float
