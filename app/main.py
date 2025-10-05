@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 from fastapi import FastAPI, UploadFile, File, Depends
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from .core.db import get_db
 from .core.settings import settings
 from .core import models  # ensures tables are created
@@ -29,6 +29,11 @@ def create_app() -> FastAPI:
     app.include_router(refresh.router)
     app.include_router(weather.router)
     app.include_router(analysis.router)
+
+    # Root redirect to dashboard
+    @app.get("/")
+    async def root():
+        return RedirectResponse(url="/now")
 
     # Favicon route
     @app.get("/favicon.ico")

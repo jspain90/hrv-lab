@@ -1,101 +1,118 @@
-/* POTS Laboratory - Semi-Dark Mode Theme */
+/* POTS Laboratory - Mobile-First Semi-Dark Mode Theme */
 
-/* Base Styles */
+/* === BASE STYLES (Mobile First) === */
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  margin: 24px;
+  margin: 0;
+  padding: 12px;
   background: #1a1d23;
   color: #e4e6eb;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .wrap {
-  max-width: 960px;
+  max-width: 100%;
   margin: auto;
 }
 
 h1 {
   color: #e4e6eb;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
 }
 
 h3 {
   color: #e4e6eb;
   font-weight: 500;
-  margin-bottom: 1rem;
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
 }
 
-/* Cards */
+p {
+  margin: 0 0 1rem;
+}
+
+/* === CARDS === */
 .card {
-  padding: 20px;
+  padding: 16px;
   background: #24272e;
   border: 1px solid #3a3d44;
-  border-radius: 12px;
-  margin: 16px 0;
+  border-radius: 8px;
+  margin: 12px 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Layout */
+/* === LAYOUT === */
 .row {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-/* Buttons */
+/* === BUTTONS === */
 .btn {
   display: inline-block;
-  padding: 12px 18px;
-  font-size: 16px;
+  padding: 12px 16px;
+  font-size: 14px;
   background: #2d3139;
   color: #e4e6eb;
   border: 1px solid #3a3d44;
-  border-radius: 10px;
+  border-radius: 8px;
   text-decoration: none;
   transition: all 0.2s ease;
+  text-align: center;
+  white-space: nowrap;
 }
 
-.btn:hover {
+.btn:active {
   background: #363942;
-  border-color: #3b82f6;
-  transform: translateY(-1px);
+  transform: scale(0.98);
 }
 
 button {
   background: #3b82f6;
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
+  width: 100%;
+  max-width: 300px;
 }
 
-button:hover {
+button:active {
   background: #2563eb;
-  transform: translateY(-1px);
+  transform: scale(0.98);
 }
 
 button[type="submit"] {
   background: #10b981;
 }
 
-button[type="submit"]:hover {
+button[type="submit"]:active {
   background: #059669;
 }
 
-/* Form Elements */
+/* === FORM ELEMENTS === */
 input,
 select,
 .metric-select {
   background: #2d3139;
   color: #e4e6eb;
   border: 1px solid #3a3d44;
-  padding: 8px;
+  padding: 10px;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 16px;
+  width: 100%;
 }
 
 input:focus,
@@ -112,14 +129,17 @@ label {
   font-size: 14px;
 }
 
-/* Analysis Tab Styles */
+/* === METRIC SELECT === */
 .metric-select {
   margin-bottom: 12px;
   width: 100%;
-  max-width: 300px;
+  max-width: 100%;
 }
 
+/* === CANVAS/CHARTS === */
 canvas[id^="chart"] {
+  width: 100% !important;
+  height: auto !important;
   max-width: 100%;
   margin-top: 12px;
   display: block;
@@ -129,11 +149,12 @@ canvas[id^="chart"] {
 
 .intervention-legend {
   margin-top: 16px;
-  padding: 14px;
+  padding: 12px;
   background: #2d3139;
   border: 1px solid #3a3d44;
   border-radius: 8px;
   display: none;
+  font-size: 13px;
 }
 
 .intervention-legend strong {
@@ -145,33 +166,52 @@ canvas[id^="chart"] {
 .intervention-legend .legend-items {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
+  font-size: 12px;
 }
 
-/* Tab Navigation */
+/* === TAB NAVIGATION === */
 .tab-nav {
   display: flex;
   gap: 4px;
-  margin-bottom: 1.5em;
+  margin-bottom: 1rem;
   border-bottom: 2px solid #3a3d44;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #3a3d44 #1a1d23;
+}
+
+.tab-nav::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tab-nav::-webkit-scrollbar-track {
+  background: #1a1d23;
+}
+
+.tab-nav::-webkit-scrollbar-thumb {
+  background: #3a3d44;
+  border-radius: 2px;
 }
 
 .tab-button {
   background: #2d3139;
   color: #b0b3b8;
   border: none;
-  padding: 12px 24px;
+  padding: 10px 16px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  border-radius: 8px 8px 0 0;
+  border-radius: 6px 6px 0 0;
   transition: all 0.2s;
   border: 1px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.tab-button:hover {
+.tab-button:active {
   background: #363942;
-  color: #e4e6eb;
 }
 
 .tab-button.active {
@@ -190,35 +230,52 @@ canvas[id^="chart"] {
   display: block;
 }
 
-/* Tables */
+/* === TABLES === */
 table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 13px;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+thead,
+tbody,
+tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+thead {
+  width: calc(100% - 0px);
 }
 
 th {
   background: #2d3139;
   color: #9ca3af;
   text-align: left;
-  padding: 10px;
+  padding: 8px 4px;
   border-bottom: 2px solid #3a3d44;
   font-weight: 500;
-  font-size: 13px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 td {
-  padding: 10px;
+  padding: 8px 4px;
   border-bottom: 1px solid #3a3d44;
   color: #e4e6eb;
+  font-size: 12px;
 }
 
-tr:hover td {
+tr:active td {
   background: #2d3139;
 }
 
-/* Special Elements */
+/* === SPECIAL ELEMENTS === */
 pre {
   background: #1e2127;
   color: #e4e6eb;
@@ -227,6 +284,7 @@ pre {
   border: 1px solid #3a3d44;
   overflow-x: auto;
   white-space: pre-wrap;
+  font-size: 13px;
 }
 
 em {
@@ -239,12 +297,11 @@ a {
   text-decoration: none;
 }
 
-a:hover {
+a:active {
   color: #60a5fa;
-  text-decoration: underline;
 }
 
-/* Status Messages */
+/* === STATUS MESSAGES === */
 #interventionStatus {
   margin-top: 12px;
   padding: 8px 12px;
@@ -252,10 +309,176 @@ a:hover {
   font-size: 14px;
 }
 
-/* Legacy Chart Support */
+/* === LEGACY CHART SUPPORT === */
 #chart {
+  width: 100% !important;
+  height: auto !important;
   max-width: 100%;
   background: #1e2127;
   border-radius: 8px;
   margin-top: 12px;
+}
+
+/* ============================================ */
+/* === TABLET BREAKPOINT (768px and up) === */
+/* ============================================ */
+@media (min-width: 768px) {
+  body {
+    padding: 16px;
+  }
+
+  .wrap {
+    max-width: 960px;
+  }
+
+  h1 {
+    font-size: 1.875rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 12px;
+    margin: 16px 0;
+  }
+
+  .row {
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 12px 18px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  .btn:hover {
+    background: #363942;
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  button {
+    padding: 10px 20px;
+    width: auto;
+  }
+
+  button:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+
+  button[type="submit"]:hover {
+    background: #059669;
+  }
+
+  input,
+  select,
+  .metric-select {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .metric-select {
+    max-width: 300px;
+  }
+
+  .intervention-legend {
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .intervention-legend .legend-items {
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .tab-nav {
+    margin-bottom: 1.5em;
+  }
+
+  .tab-button {
+    padding: 12px 24px;
+    font-size: 14px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .tab-button:hover {
+    background: #363942;
+    color: #e4e6eb;
+  }
+
+  .tab-button:active {
+    background: #2d3139;
+  }
+
+  table {
+    font-size: 14px;
+    display: table;
+    overflow-x: visible;
+  }
+
+  thead,
+  tbody,
+  tr {
+    display: table-row-group;
+    width: auto;
+    table-layout: auto;
+  }
+
+  tr {
+    display: table-row;
+  }
+
+  th {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  td {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  tr:hover td {
+    background: #2d3139;
+  }
+
+  tr:active td {
+    background: transparent;
+  }
+
+  pre {
+    font-size: 14px;
+  }
+
+  a:hover {
+    color: #60a5fa;
+    text-decoration: underline;
+  }
+
+  a:active {
+    color: #3b82f6;
+  }
+}
+
+/* ============================================ */
+/* === DESKTOP BREAKPOINT (1024px and up) === */
+/* ============================================ */
+@media (min-width: 1024px) {
+  body {
+    padding: 24px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
 }
