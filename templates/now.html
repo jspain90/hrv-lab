@@ -64,24 +64,30 @@
 
     <!-- Metrics tab -->
     <div class="tab-content" id="tab-metrics">
-      <!-- Chart 1: TP Residual (Last 7 Days) -->
+      <!-- Chart 1: TP Residual -->
       <div style="margin-bottom: 24px;">
-        <select id="metric1" class="metric-select">
-          <option value="total_power_ms2_ln">Total Power (ln)</option>
-          <option value="total_power_ms2">Total Power</option>
-          <option value="lf_ms2">LF</option>
-          <option value="hf_ms2">HF</option>
-          <option value="lf_hf">LF/HF Ratio</option>
-          <option value="rmssd_ms">RMSSD</option>
-          <option value="sdnn_ms">SDNN</option>
-          <option value="hr_bpm">Heart Rate</option>
-          <option value="tp_residual">TP Residual (Intervention Effect)</option>
-          <option value="lfhf_residual">LF/HF Residual</option>
-          <option value="tp_residual_7d" selected>TP Residual (Last 7 Days)</option>
-          <option value="lfhf_residual_7d">LF/HF Residual (Last 7 Days)</option>
-          <option value="standing_hr">Standing Trial - HR (All Time)</option>
-          <option value="standing_hr_7d">Standing Trial - HR (Last 7 Days)</option>
-        </select>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px;">
+          <select id="metric1" class="metric-select">
+            <option value="total_power_ms2_ln">Total Power (ln)</option>
+            <option value="total_power_ms2">Total Power</option>
+            <option value="lf_ms2">LF</option>
+            <option value="hf_ms2">HF</option>
+            <option value="lf_hf">LF/HF Ratio</option>
+            <option value="rmssd_ms">RMSSD</option>
+            <option value="sdnn_ms">SDNN</option>
+            <option value="hr_bpm">Heart Rate</option>
+            <option value="tp_residual" selected>TP Residual (Intervention Effect)</option>
+            <option value="lfhf_residual">LF/HF Residual</option>
+            <option value="standing_hr">Standing Trial - HR</option>
+          </select>
+          <select id="dateRange1" class="metric-select" style="max-width: 150px;">
+            <option value="7">Last 7 Days</option>
+            <option value="14">Last 14 Days</option>
+            <option value="30" selected>Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
         <canvas id="chart1" width="900" height="400"></canvas>
         <div id="legend1" class="intervention-legend">
           <strong>Intervention Legend:</strong>
@@ -89,24 +95,30 @@
         </div>
       </div>
 
-      <!-- Chart 2: Standing Trial - HR (All Time) -->
+      <!-- Chart 2: Standing Trial - HR -->
       <div style="margin-bottom: 24px;">
-        <select id="metric2" class="metric-select">
-          <option value="total_power_ms2_ln">Total Power (ln)</option>
-          <option value="total_power_ms2">Total Power</option>
-          <option value="lf_ms2">LF</option>
-          <option value="hf_ms2">HF</option>
-          <option value="lf_hf">LF/HF Ratio</option>
-          <option value="rmssd_ms">RMSSD</option>
-          <option value="sdnn_ms">SDNN</option>
-          <option value="hr_bpm">Heart Rate</option>
-          <option value="tp_residual">TP Residual (Intervention Effect)</option>
-          <option value="lfhf_residual">LF/HF Residual</option>
-          <option value="tp_residual_7d">TP Residual (Last 7 Days)</option>
-          <option value="lfhf_residual_7d">LF/HF Residual (Last 7 Days)</option>
-          <option value="standing_hr" selected>Standing Trial - HR (All Time)</option>
-          <option value="standing_hr_7d">Standing Trial - HR (Last 7 Days)</option>
-        </select>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px;">
+          <select id="metric2" class="metric-select">
+            <option value="total_power_ms2_ln">Total Power (ln)</option>
+            <option value="total_power_ms2">Total Power</option>
+            <option value="lf_ms2">LF</option>
+            <option value="hf_ms2">HF</option>
+            <option value="lf_hf">LF/HF Ratio</option>
+            <option value="rmssd_ms">RMSSD</option>
+            <option value="sdnn_ms">SDNN</option>
+            <option value="hr_bpm">Heart Rate</option>
+            <option value="tp_residual">TP Residual (Intervention Effect)</option>
+            <option value="lfhf_residual">LF/HF Residual</option>
+            <option value="standing_hr" selected>Standing Trial - HR</option>
+          </select>
+          <select id="dateRange2" class="metric-select" style="max-width: 150px;">
+            <option value="7">Last 7 Days</option>
+            <option value="14">Last 14 Days</option>
+            <option value="30">Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+            <option value="all" selected>All Time</option>
+          </select>
+        </div>
         <canvas id="chart2" width="900" height="400"></canvas>
         <div id="legend2" class="intervention-legend">
           <strong>Intervention Legend:</strong>
@@ -116,22 +128,28 @@
 
       <!-- Chart 3: Total Power -->
       <div style="margin-bottom: 24px;">
-        <select id="metric3" class="metric-select">
-          <option value="total_power_ms2_ln">Total Power (ln)</option>
-          <option value="total_power_ms2" selected>Total Power</option>
-          <option value="lf_ms2">LF</option>
-          <option value="hf_ms2">HF</option>
-          <option value="lf_hf">LF/HF Ratio</option>
-          <option value="rmssd_ms">RMSSD</option>
-          <option value="sdnn_ms">SDNN</option>
-          <option value="hr_bpm">Heart Rate</option>
-          <option value="tp_residual">TP Residual (Intervention Effect)</option>
-          <option value="lfhf_residual">LF/HF Residual</option>
-          <option value="tp_residual_7d">TP Residual (Last 7 Days)</option>
-          <option value="lfhf_residual_7d">LF/HF Residual (Last 7 Days)</option>
-          <option value="standing_hr">Standing Trial - HR (All Time)</option>
-          <option value="standing_hr_7d">Standing Trial - HR (Last 7 Days)</option>
-        </select>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px;">
+          <select id="metric3" class="metric-select">
+            <option value="total_power_ms2_ln">Total Power (ln)</option>
+            <option value="total_power_ms2" selected>Total Power</option>
+            <option value="lf_ms2">LF</option>
+            <option value="hf_ms2">HF</option>
+            <option value="lf_hf">LF/HF Ratio</option>
+            <option value="rmssd_ms">RMSSD</option>
+            <option value="sdnn_ms">SDNN</option>
+            <option value="hr_bpm">Heart Rate</option>
+            <option value="tp_residual">TP Residual (Intervention Effect)</option>
+            <option value="lfhf_residual">LF/HF Residual</option>
+            <option value="standing_hr">Standing Trial - HR</option>
+          </select>
+          <select id="dateRange3" class="metric-select" style="max-width: 150px;">
+            <option value="7">Last 7 Days</option>
+            <option value="14">Last 14 Days</option>
+            <option value="30">Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+            <option value="all" selected>All Time</option>
+          </select>
+        </div>
         <canvas id="chart3" width="900" height="400"></canvas>
         <div id="legend3" class="intervention-legend">
           <strong>Intervention Legend:</strong>

@@ -29,11 +29,24 @@ def gmail_service():
         creds = Credentials.from_authorized_user_file(TOKEN, SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+                TOKEN.write_text(creds.to_json(), encoding="utf-8")
+            except Exception as e:
+                # Token refresh failed - needs interactive re-auth
+                # Don't hang - just raise an error that can be caught
+                raise RuntimeError(f"Gmail token expired or revoked. Run 'python -m pipeline.gmail_fetch' manually to re-authenticate. Error: {e}")
         else:
+            # No valid token exists - needs interactive auth
+            # Check if we're in a non-interactive environment (service)
+            import os
+            if os.environ.get('NSSM_SERVICE') or not sys.stdin.isatty():
+                raise RuntimeError("Gmail authentication required but running in non-interactive mode. Run 'python -m pipeline.gmail_fetch' manually to authenticate.")
+
+            # Interactive mode - open browser
             flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS), SCOPES)
             creds = flow.run_local_server(port=0)
-        TOKEN.write_text(creds.to_json(), encoding="utf-8")
+            TOKEN.write_text(creds.to_json(), encoding="utf-8")
     return build("gmail", "v1", credentials=creds)
 
 def get_or_create_label(svc, name: str) -> str:

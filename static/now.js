@@ -15,17 +15,34 @@ document.querySelectorAll('.tab-button').forEach(button => {
 
 async function loadSeries(chartNum){
   const metric = document.getElementById(`metric${chartNum}`).value;
+  const dateRange = document.getElementById(`dateRange${chartNum}`).value;
+
+  // Calculate start and end dates based on selected range
+  let startDate = null;
+  let endDate = null;
+  if (dateRange !== 'all') {
+    const days = parseInt(dateRange);
+    const now = new Date();
+    endDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const start = new Date(now);
+    start.setDate(start.getDate() - days);
+    startDate = start.toISOString().split('T')[0]; // YYYY-MM-DD
+  }
 
   // Determine if it's a dual-series metric (standing trials)
   const isDualSeries = metric.startsWith('standing_');
 
   let seriesEndpoint;
-  if (metric === 'standing_hr') {
+  if (isDualSeries) {
     seriesEndpoint = '/metrics/standing-trials';
-  } else if (metric === 'standing_hr_7d') {
-    seriesEndpoint = '/metrics/standing-trials-7d';
+    if (startDate && endDate) {
+      seriesEndpoint += `?start=${startDate}&end=${endDate}`;
+    }
   } else {
     seriesEndpoint = '/metrics/series?metric=' + encodeURIComponent(metric);
+    if (startDate && endDate) {
+      seriesEndpoint += `&start=${startDate}&end=${endDate}`;
+    }
   }
 
   // Fetch both series data and compliance events in parallel
@@ -312,14 +329,13 @@ function drawDualSeries(chartNum, ts, primaryVals, secondaryVals, label, complia
     ctx.lineTo(xscale(validIndices[validIndices.length - 1]), yscale_primary(y2));
     ctx.stroke();
 
-    // Display R-squared for 7-day views
-    if (is7Day) {
-      ctx.fillStyle = '#ff8c00';
-      ctx.font = 'bold 14px sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText(`R² = ${rSquared.toFixed(3)}`, W - pad - 10, pad + 20);
-      ctx.textAlign = 'left';
-    }
+    // Display slope in upper right corner
+    ctx.fillStyle = '#ff8c00';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'right';
+    const slopeSign = slope >= 0 ? '+' : '';
+    ctx.fillText(`${slopeSign}${slope.toFixed(3)}/day`, W - pad - 10, pad + 20);
+    ctx.textAlign = 'left';
   }
 
   // Draw hr_bpm data points (foreground layer)
@@ -518,14 +534,13 @@ function draw(chartNum, ts, vals, label, complianceEvents = []){
     ctx.lineTo(xscale(validIndices[validIndices.length - 1]), yscale(y2));
     ctx.stroke();
 
-    // Display R-squared for 7-day views in upper right corner
-    if (is7Day) {
-      ctx.fillStyle = '#ff8c00';
-      ctx.font = 'bold 14px sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText(`R² = ${rSquared.toFixed(3)}`, W - pad - 10, pad + 20);
-      ctx.textAlign = 'left';
-    }
+    // Display slope in upper right corner
+    ctx.fillStyle = '#ff8c00';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'right';
+    const slopeSign = slope >= 0 ? '+' : '';
+    ctx.fillText(`${slopeSign}${slope.toFixed(3)}/day`, W - pad - 10, pad + 20);
+    ctx.textAlign = 'left';
   }
 
   // Draw compliance event vertical lines
@@ -626,9 +641,19 @@ if (btn) btn.addEventListener('click', refreshData);
 
 // Metric charts - setup event listeners and load all three charts
 [1, 2, 3].forEach(chartNum => {
-  const select = document.getElementById(`metric${chartNum}`);
-  if (select) {
-    select.addEventListener('change', () => loadSeries(chartNum));
+  const metricSelect = document.getElementById(`metric${chartNum}`);
+  const dateRangeSelect = document.getElementById(`dateRange${chartNum}`);
+
+  if (metricSelect) {
+    metricSelect.addEventListener('change', () => loadSeries(chartNum));
+  }
+
+  if (dateRangeSelect) {
+    dateRangeSelect.addEventListener('change', () => loadSeries(chartNum));
+  }
+
+  // Load initial chart
+  if (metricSelect) {
     loadSeries(chartNum);
   }
 });
