@@ -55,9 +55,9 @@ async function loadSeries(chartNum){
   const eventsData = await eventsRes.json();
 
   if (isDualSeries) {
-    drawDualSeries(chartNum, seriesData.t, seriesData.v1, seriesData.v2, metric, eventsData);
+    drawDualSeries(chartNum, seriesData.t, seriesData.v1, seriesData.v2, metric, eventsData, dateRange);
   } else {
-    draw(chartNum, seriesData.t, seriesData.v, metric, eventsData);
+    draw(chartNum, seriesData.t, seriesData.v, metric, eventsData, dateRange);
   }
   updateLegend(chartNum, eventsData);
 }
@@ -118,7 +118,7 @@ function updateLegend(chartNum, complianceEvents) {
   legendContainer.style.display = 'block';
 }
 
-function drawDualSeries(chartNum, ts, primaryVals, secondaryVals, label, complianceEvents = []){
+function drawDualSeries(chartNum, ts, primaryVals, secondaryVals, label, complianceEvents = [], dateRange = 'all'){
   const c = document.getElementById(`chart${chartNum}`);
   const ctx = c.getContext('2d');
   ctx.clearRect(0,0,c.width,c.height);
@@ -126,8 +126,10 @@ function drawDualSeries(chartNum, ts, primaryVals, secondaryVals, label, complia
 
   const W=c.width, H=c.height, pad=60;
 
-  // Check if this is a 7-day view
-  const is7Day = label.includes('_7d');
+  // Check if this should show daily labels (7 or 14 day views)
+  const showDailyLabels = dateRange === '7' || dateRange === '14';
+  // Keep is7Day for rendering style (line vs scatter)
+  const is7Day = showDailyLabels;
 
   // Convert timestamps to actual time values for proper spacing
   const timeValues = ts.map(t => new Date(t.replace(' ', 'T')).getTime());
@@ -156,14 +158,36 @@ function drawDualSeries(chartNum, ts, primaryVals, secondaryVals, label, complia
   const secondary_max = Math.max.apply(null, secondary_nums);
   const yscale_secondary = (v)=> H-pad - (H-2*pad)*((v - secondary_min)/((secondary_max - secondary_min)||1));
 
+  // Draw Y-axis labels for HR (bpm)
+  ctx.fillStyle = '#9ca3af';
+  ctx.font = '12px sans-serif';
+  ctx.textAlign = 'right';
+
+  // Add 3-5 Y-axis tick marks
+  const numTicks = 5;
+  for (let i = 0; i <= numTicks; i++) {
+    const value = primary_min + (primary_max - primary_min) * (i / numTicks);
+    const y = yscale_primary(value);
+    ctx.fillText(Math.round(value), pad - 10, y + 4);
+  }
+
+  // Add Y-axis label "bpm"
+  ctx.save();
+  ctx.translate(15, H / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.fillText('bpm', 0, 0);
+  ctx.restore();
+
   // Add time labels on x-axis (reuse logic from draw function)
   if (ts.length > 0) {
     ctx.fillStyle = '#9ca3af';
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
 
-    if (is7Day) {
-      // For 7-day views: show day of week
+    if (showDailyLabels) {
+      // For 7-day and 14-day views: show day of week
       const dateGroups = new Map();
       ts.forEach((timestamp, idx) => {
         const date = new Date(timestamp.replace(' ', 'T'));
@@ -366,7 +390,7 @@ function drawDualSeries(chartNum, ts, primaryVals, secondaryVals, label, complia
   }
 }
 
-function draw(chartNum, ts, vals, label, complianceEvents = []){
+function draw(chartNum, ts, vals, label, complianceEvents = [], dateRange = 'all'){
   const c = document.getElementById(`chart${chartNum}`);
   const ctx = c.getContext('2d');
   ctx.clearRect(0,0,c.width,c.height);
@@ -378,8 +402,10 @@ function draw(chartNum, ts, vals, label, complianceEvents = []){
   const xscale = (i)=> pad + (W-2*pad)*(i/((ts.length-1)||1));
   const yscale = (v)=> H-pad - (H-2*pad)*((v - vmin)/((vmax - vmin)||1));
 
-  // Check if this is a 7-day view (check for _7d suffix in metric name)
-  const is7Day = label.includes('_7d');
+  // Check if this should show daily labels (7 or 14 day views)
+  const showDailyLabels = dateRange === '7' || dateRange === '14';
+  // Keep is7Day for rendering style (line vs scatter)
+  const is7Day = showDailyLabels;
 
   // Axes removed - cleaner look focusing on data and trends
 
@@ -389,8 +415,8 @@ function draw(chartNum, ts, vals, label, complianceEvents = []){
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
 
-    if (is7Day) {
-      // For 7-day views: show day of week (rotated like month labels)
+    if (showDailyLabels) {
+      // For 7-day and 14-day views: show day of week (rotated like month labels)
       const dateGroups = new Map();
       ts.forEach((timestamp, idx) => {
         const date = new Date(timestamp.replace(' ', 'T'));

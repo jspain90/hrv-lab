@@ -57,7 +57,7 @@ def metric_series(
         if start:
             conditions.append(f"timestamp >= '{start}'")
         if end:
-            conditions.append(f"timestamp <= '{end} 23:59:59'")
+            conditions.append(f"timestamp <= '{end}T23:59:59'")
 
         if conditions:
             query += " AND " + " AND ".join(conditions)
@@ -92,7 +92,7 @@ def metric_series(
     if start:
         conditions.append(f"timestamp >= '{start}'")
     if end:
-        conditions.append(f"timestamp <= '{end} 23:59:59'")
+        conditions.append(f"timestamp <= '{end}T23:59:59'")
 
     if conditions:
         query += " AND " + " AND ".join(conditions)
@@ -167,7 +167,7 @@ def standing_trials_series(
     if start:
         conditions.append(f"timestamp >= '{start}'")
     if end:
-        conditions.append(f"timestamp <= '{end} 23:59:59'")
+        conditions.append(f"timestamp <= '{end}T23:59:59'")
 
     if conditions:
         query += " AND " + " AND ".join(conditions)
