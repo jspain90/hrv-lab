@@ -492,6 +492,28 @@ function draw(chartNum, ts, vals, label, complianceEvents = [], dateRange = 'all
     ctx.textAlign = 'left';
   }
 
+  // Add BPM ticks/label for heart-rate metric
+  if (label === 'hr_bpm') {
+    const numTicks = 5;
+    const range = vmax - vmin;
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= numTicks; i++) {
+      const value = vmin + (range === 0 ? 0 : range * (i / numTicks));
+      const y = yscale(value);
+      ctx.fillText(Math.round(value), pad - 10, y + 4);
+    }
+    ctx.save();
+    ctx.translate(15, H / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('bpm', 0, 0);
+    ctx.restore();
+    ctx.textAlign = 'left';
+  }
+
   // For residuals, draw zero line in very light gray
   const isResidual = label.includes('residual');
   if (isResidual && vmin < 0 && vmax > 0) {
