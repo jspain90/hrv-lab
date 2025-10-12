@@ -147,18 +147,28 @@ def get_compliance_stats(filter: str = "active", db: Session = Depends(get_db)):
     """
     today = dt.date.today()
 
-    base_query = db.query(Intervention)
-    if filter == "active":
-        interventions = base_query.filter(Intervention.active.is_(True)).all()
-    elif filter == "completed":
-        interventions = base_query.filter(Intervention.active.is_(False)).all()
-    else:
-        return []
+    interventions = db.query(Intervention).all()
 
     results = []
     for intervention in interventions:
         # Calculate end_date
         end_date = intervention.start_date + dt.timedelta(days=intervention.duration_weeks * 7)
+
+        # Apply filter logic
+        if filter == "active":
+            # Only show interventions still marked active and not yet completed by date
+            if not intervention.active:
+                continue
+            if today > end_date:
+                continue
+        elif filter == "completed":
+            # Completed list shows active interventions whose end date has passed
+            if not intervention.active:
+                continue
+            if not (today > end_date):
+                continue
+        else:
+            continue
 
         # Count compliance events during the intervention period only
         completed_compliance = db.query(ComplianceEvent).filter(
