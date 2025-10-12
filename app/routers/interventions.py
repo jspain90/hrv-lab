@@ -143,29 +143,22 @@ def get_compliance_stats(filter: str = "active", db: Session = Depends(get_db)):
     """
     Get compliance statistics for interventions.
 
-    filter: 'active' for ongoing interventions, 'completed' for finished interventions
+    filter: 'active' returns interventions flagged as active, 'completed' returns inactive interventions
     """
     today = dt.date.today()
 
-    # Get all active interventions
-    interventions = db.query(Intervention).filter_by(active=True).all()
+    base_query = db.query(Intervention)
+    if filter == "active":
+        interventions = base_query.filter(Intervention.active.is_(True)).all()
+    elif filter == "completed":
+        interventions = base_query.filter(Intervention.active.is_(False)).all()
+    else:
+        return []
 
     results = []
     for intervention in interventions:
         # Calculate end_date
         end_date = intervention.start_date + dt.timedelta(days=intervention.duration_weeks * 7)
-
-        # Apply filter
-        if filter == "active":
-            # Active: current_date > start_date AND current_date < end_date
-            if not (today > intervention.start_date and today < end_date):
-                continue
-        elif filter == "completed":
-            # Completed: current_date > end_date
-            if not (today > end_date):
-                continue
-        else:
-            continue
 
         # Count compliance events during the intervention period only
         completed_compliance = db.query(ComplianceEvent).filter(
@@ -179,6 +172,8 @@ def get_compliance_stats(filter: str = "active", db: Session = Depends(get_db)):
         trial_length_days = (end_date - intervention.start_date).days
         trial_days_completed = (today - intervention.start_date).days
 
+        if trial_days_completed < 0:
+            trial_days_completed = 0
         # Ensure we don't exceed 100% for completed interventions
         if trial_days_completed > trial_length_days:
             trial_days_completed = trial_length_days
