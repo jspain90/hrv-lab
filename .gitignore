@@ -13,6 +13,8 @@ token.json
 secrets/*
 state/*
 credentials.json 
+hrv_lab.sqlite3-shm
+hrv_lab.sqlite3-wal
 
 # OS/editor
 .DS_Store
